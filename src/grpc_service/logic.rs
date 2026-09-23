@@ -8,17 +8,22 @@
 //! 3. Envolver el contenido en el mensaje interno del sistema (`RouterMessage`).
 //! 4. Enviarlo al canal central (`central_tx`) para que el [`Dispatcher`] decida qué hacer.
 
-
-use tokio::sync::{mpsc};
-use tracing::{debug, error};
 use crate::grpc::{
+    FromDataSaver,
+    FromEdge,
+    FromManager,
+    ToDataSaver,
     // Mensajes
-    ToEdge, FromEdge, to_edge,
-    ToManager, FromManager, to_manager, from_manager,
-    ToDataSaver, FromDataSaver, to_data_saver,
+    ToEdge,
+    ToManager,
+    from_manager,
+    to_data_saver,
+    to_edge,
+    to_manager,
 };
-use crate::router::domain::{RouterMessage};
-
+use crate::router::domain::RouterMessage;
+use tokio::sync::mpsc;
+use tracing::{debug, error};
 
 /// **Procesa mensajes provenientes de un dispositivo Edge.**
 ///
@@ -45,8 +50,8 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
-            Payload::Monitor(monitor) => {
+            }
+            Payload::HubMonitor(monitor) => {
                 debug!("mensaje Monitor recibido desde edge");
                 let router_msg = RouterMessage::ToData {
                     message: ToDataSaver {
@@ -56,7 +61,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::AlertAir(alert) => {
                 debug!("mensaje AlertAir recibido desde edge");
                 let router_msg = RouterMessage::ToData {
@@ -67,7 +72,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::AlertTh(alert) => {
                 debug!("mensaje AlertTh recibido desde edge");
                 let router_msg = RouterMessage::ToData {
@@ -78,7 +83,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::MeasurementBatch(measurement) => {
                 debug!("mensaje MeasurementBatch recibido desde edge");
                 let router_msg = RouterMessage::ToData {
@@ -89,7 +94,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::MonitorBatch(monitor) => {
                 debug!("mensaje MonitorBatch recibido desde edge");
                 let router_msg = RouterMessage::ToData {
@@ -100,7 +105,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::AlertAirBatch(alert) => {
                 debug!("mensaje AlertAirBatch recibido desde edge");
                 let router_msg = RouterMessage::ToData {
@@ -111,7 +116,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::AlertThBatch(alert) => {
                 debug!("mensaje AlertThBatch recibido desde edge");
                 let router_msg = RouterMessage::ToData {
@@ -122,8 +127,8 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
-            Payload::Metric(metric) => {
+            }
+            Payload::EdgeMonitor(metric) => {
                 debug!("mensaje Metric recibido desde edge");
                 let router_msg = RouterMessage::ToData {
                     message: ToDataSaver {
@@ -133,7 +138,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
 
             // Mensajes que van a Manager
             Payload::Settings(settings) => {
@@ -147,9 +152,9 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::SettingOk(setting_ok) => {
-                debug!("mensaje SettingsOk recibido desde edge");
+                debug!("mensaje SettingAck recibido desde edge");
                 let router_msg = RouterMessage::ToManager {
                     message: ToManager {
                         edge_id: msg.edge_id.clone(),
@@ -159,9 +164,9 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
-            Payload::FirmwareOutcome(outcome) => {
-                debug!("mensaje FirmwareOutcome recibido desde edge");
+            }
+            Payload::FirmwareHubResult(outcome) => {
+                debug!("mensaje FirmwareHubResult recibido desde edge");
                 let router_msg = RouterMessage::ToManager {
                     message: ToManager {
                         edge_id: msg.edge_id.clone(),
@@ -171,7 +176,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::HelloWorld(hello) => {
                 debug!("mensaje HelloWorld recibido desde edge");
                 let router_msg = RouterMessage::ToManager {
@@ -183,7 +188,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::EdgeState(state) => {
                 debug!("mensaje EdgeState recibido desde edge");
                 let router_msg = RouterMessage::ToManager {
@@ -195,7 +200,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::NetworkAck(network_ack) => {
                 debug!("mensaje NetworkAck recibido desde edge");
                 let router_msg = RouterMessage::ToManager {
@@ -207,7 +212,7 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
+            }
             Payload::HubState(hub_state) => {
                 debug!("mensaje HubState recibido desde edge");
                 let router_msg = RouterMessage::ToManager {
@@ -219,9 +224,9 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
                 if central_tx.send(router_msg).await.is_err() {
                     error!("Error: no se pudo enviar mensaje a traves de central_tx");
                 }
-            },
-            Payload::OutcomeError(outcome) => {
-                debug!("mensaje FirmwareOutcomeError recibido desde edge");
+            }
+            Payload::FirmwareEdgeResult(outcome) => {
+                debug!("mensaje FirmwareEdgeResult recibido desde edge");
                 let router_msg = RouterMessage::ToManager {
                     message: ToManager {
                         edge_id: msg.edge_id.clone(),
@@ -236,7 +241,6 @@ pub async fn process_from_edge(msg: FromEdge, central_tx: &mpsc::Sender<RouterMe
     }
 }
 
-
 /// **Procesa mensajes provenientes del Manager.**
 ///
 /// Convierte comandos administrativos (`FromManager`) en mensajes ejecutables para el Edge (`ToEdge`).
@@ -248,25 +252,21 @@ pub async fn process_from_manager(msg: FromManager, central_tx: &mpsc::Sender<Ro
         use from_manager::Payload;
         let to_edge_payload = match payload {
             Payload::SettingOk(s) => {
-                debug!("mensaje SettingOk recibido desde manager");
-                Some(to_edge::Payload::SettingOk(s))
-            },
+                debug!("mensaje SettingAck recibido desde manager");
+                Some(to_edge::Payload::SettingsAck(s))
+            }
             Payload::UpdateFirmware(u) => {
                 debug!("mensaje UpdateFirmware recibido desde manager");
                 Some(to_edge::Payload::UpdateFirmware(u))
-            },
+            }
             Payload::Network(n) => {
                 debug!("mensaje Network recibido desde manager");
                 Some(to_edge::Payload::Network(n))
-            },
-            Payload::DeleteHub(d) => {
-                debug!("mensaje DeleteHub recibido desde manager");
-                Some(to_edge::Payload::DeleteHub(d))
-            },
+            }
             Payload::Settings(s) => {
                 debug!("mensaje Settings recibido desde manager");
                 Some(to_edge::Payload::Settings(s))
-            },
+            }
         };
 
         if let Some(payload) = to_edge_payload {
@@ -285,22 +285,17 @@ pub async fn process_from_manager(msg: FromManager, central_tx: &mpsc::Sender<Ro
     }
 }
 
-
 /// **Procesa mensajes provenientes de Data Saver.**
 ///
 /// Usado para señales de control global, como Heartbeats.
 /// Si se recibe un Heartbeat, se empaqueta para ser enviado a "todos" (Broadcast).
-pub async fn process_from_data(msg: FromDataSaver,
-                               central_tx: &mpsc::Sender<RouterMessage>) {
-
+pub async fn process_from_data(msg: FromDataSaver, central_tx: &mpsc::Sender<RouterMessage>) {
     use crate::grpc::from_data_saver::Payload;
 
     if let Some(payload) = msg.payload {
         debug!("mensaje Heartbeat desde data");
         let to_edge_payload = match payload {
-            Payload::Heartbeat(heartbeat) => {
-                Some(to_edge::Payload::Heartbeat(heartbeat))
-            }
+            Payload::Heartbeat(heartbeat) => Some(to_edge::Payload::Heartbeat(heartbeat)),
         };
 
         if let Some(payload) = to_edge_payload {
