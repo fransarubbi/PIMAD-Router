@@ -267,6 +267,10 @@ pub async fn process_from_manager(msg: FromManager, central_tx: &mpsc::Sender<Ro
                 debug!("mensaje Settings recibido desde manager");
                 Some(to_edge::Payload::Settings(s))
             }
+            Payload::UpdateEdgeFirmware(s) => {
+                debug!("mensaje UpdateEdgeFirmware recibido desde manager");
+                Some(to_edge::Payload::UpdateEdgeFirmware(s))
+            }
         };
 
         if let Some(payload) = to_edge_payload {

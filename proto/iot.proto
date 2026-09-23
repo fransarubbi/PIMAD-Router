@@ -73,6 +73,7 @@ message FromManager {
     UpdateFirmware update_firmware = 3;
     Network network = 4;
     Settings settings = 5;
+    UpdateEdgeFirmware update_edge_firmware = 6;
   }
 }
 
