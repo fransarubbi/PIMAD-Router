@@ -1,8 +1,6 @@
-# Iot Router Service
+# PIMAD Router Service
 
-IoT Router Service is a lightweight, high-performance Rust service that routes messages between IoT devices and 
-backend systems. It is designed to act as a protocol bridge and message router, providing observability and resilience
-for constrained IoT environments.
+PIMAD Router Service is a lightweight, high-performance Rust service that routes messages between IoT devices and backend systems. It is designed to act as a protocol bridge and message router, providing observability and resilience for constrained IoT environments.
 
 
 ## Key features
@@ -32,17 +30,6 @@ The codebase is modular so you can add new adapters and transform plugins.
 
 - Rust toolchain (stable) — install from https://rustup.rs
 - Optional: Docker and docker-compose for containerized deployment
-
-## Quickstart
-
-Clone and build:
-
-```bash
-git clone https://github.com/fransarubbi/iot_router_service.git
-cd iot_router_service
-# build in release mode
-cargo build --release
-```
 
 
 ## Configuration
